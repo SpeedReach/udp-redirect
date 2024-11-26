@@ -32,7 +32,7 @@ func AttachEbpf() Attachment {
 		panic(err)
 	}
 
-	xdpLink, err := link.AttachXDP(link.XDPOptions{
+	xdpLink, err := link.AttachTCX(link.TCXOptions{
 		Interface: iface.Index,
 		Program:   objs.Tcdump,
 	})
