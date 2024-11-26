@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"net"
+
+	"github.com/SpeedReach/udp_redirect/tc_redirect"
 )
 
 const serverIp = "192.168.50.224"
@@ -20,6 +22,9 @@ func main(){
 }
 
 func StartClient(){
+	link := tc_redirect.AttachEbpf()
+	defer link.Close()
+	
 	addr := net.UDPAddr{
 		Port: serverPort,
 		IP:   net.ParseIP(serverIp),
