@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 )
@@ -9,8 +10,13 @@ const serverIp = "192.168.50.224"
 const serverPort = 12345
 
 func main(){
-	go StartClient()
-	StartServer()
+	isServer := flag.Bool("server", false, "true")
+	flag.Parse()
+	if *isServer{
+		StartServer()
+	} else{
+		StartClient()
+	}
 }
 
 func StartClient(){
