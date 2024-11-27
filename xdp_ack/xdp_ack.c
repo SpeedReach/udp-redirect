@@ -40,7 +40,6 @@ __u8 ack_mac[6] = {0x9c, 0x2d, 0xcd, 0x48, 0xb1, 0x04};
 
 SEC("xdp")
 int xdp_ack(struct xdp_md *ctx) {
-	return XDP_PASS;
 	void* data = (void*)(long)ctx->data;
 	void* data_end = (void*)(long)ctx->data_end;
 
