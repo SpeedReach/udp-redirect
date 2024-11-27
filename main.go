@@ -36,8 +36,10 @@ func main(){
 	if *isServer{
 		for i := 0; i < serverCount; i++{
 			server := NewServer(serverIp[i], serverPort[i])
-			defer server.Close()
-			go server.Start()
+			go func ()  {
+				defer server.Close()
+				server.Start()
+			}()
 		}
 		for {}
 	} else{
