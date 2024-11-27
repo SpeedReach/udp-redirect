@@ -80,6 +80,7 @@ func (c Client) Close(){
 
 
 func (client Client) StartClient(){
+	defer client.Close()
 	for {
 		_, err := client.broadcastConn.Write([]byte("Hiiiiiiiiiiiiiiiii"))
 		if err != nil{
@@ -90,7 +91,6 @@ func (client Client) StartClient(){
 			buffer := make([]byte, 1024)
 			n, _, err := client.ackConn.ReadFromUDP(buffer)
 			if err != nil{
-				defer client.Close()
 				panic(err)
 			}
 			fmt.Printf("Received  %d ack %s\n", i, string(buffer[:n]))
