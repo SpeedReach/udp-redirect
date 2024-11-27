@@ -56,10 +56,13 @@ func NewClient(ackIp string, ackPort int) Client{
 	if err != nil{
 		panic(err)
 	}
+
+
 	ackAddr := net.UDPAddr{
-		IP: net.IP(ackIp),
 		Port: ackPort,
+		IP:   net.ParseIP(ackIp),
 	}
+
 	ackConn, err := net.ListenUDP("udp", &ackAddr)
 	if err != nil{
 		panic(err)
