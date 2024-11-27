@@ -53,7 +53,6 @@ int tcdump(struct __sk_buff *ctx) {
 	struct hdr header = try_parse_udp(data, data_end);
 
 	if (header.udp == NULL) {
-		bpf_printk("not udp packet\n");
 		return TC_ACT_OK;
 	}
 	if(header.udp->dest != bpf_htons(redirect_port)){
@@ -107,7 +106,6 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 	
 	struct iphdr* ip = data + ETH_SIZE;
 	if(ip->protocol != IP_P_UDP){
-		bpf_printk("ip protocol %d\n", ip->protocol);
 		return (struct hdr) {NULL,NULL, NULL};
 	}
 	

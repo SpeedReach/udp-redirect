@@ -37,9 +37,6 @@ func StartClient(){
 		panic(err)
 	}
 	defer conn.Close()
-	for{
-		
-	}
 
 	for {
 		_, err = conn.Write([]byte("Hiiiiiiiiiiiiiiiii"))
