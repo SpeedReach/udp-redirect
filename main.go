@@ -34,6 +34,8 @@ func main(){
 	isServer := flag.Bool("server", false, "true")
 	flag.Parse()
 	if *isServer{
+		link := xdp_ack.AttachEbpf()
+
 		for i := 0; i < serverCount; i++{
 			server := NewServer(serverIp[i], serverPort[i])
 			go func ()  {
@@ -41,6 +43,7 @@ func main(){
 				server.Start()
 			}()
 		}
+		defer link.Close()
 		for {}
 	} else{
 		client := NewClient(ackIp, ackPort, false)
@@ -153,7 +156,7 @@ type Server struct{
 
 func NewServer(ip string, port int) Server{
 
-	link := xdp_ack.AttachEbpf()
+	
 
 	addr := net.UDPAddr{
 		Port: port,
@@ -177,7 +180,6 @@ func NewServer(ip string, port int) Server{
 		Port: port,
 		conn: conn,
 		ackConn: ackConn,
-		ebpfAttachment: link,
 	}
 
 }
