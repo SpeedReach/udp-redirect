@@ -11,7 +11,7 @@ import (
 const serverIp = "192.168.50.224"
 const serverPort = 12345
 const redirectPort = 12346
-const redirectIp = "192.168.50.223"
+const redirectIp = "192.168.50.230"
 
 func main(){
 	isServer := flag.Bool("server", false, "true")
