@@ -23,7 +23,7 @@ var serverPort = [serverCount]int{
 }
 
 const redirectPort = 12345
-const redirectIp = "192.168.50.224"
+const redirectIp = "192.168.50.230"
 
 const ackPort = 12345
 const ackIp = "192.168.50.213"
