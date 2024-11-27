@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/SpeedReach/udp_redirect/tc_redirect"
 )
@@ -98,6 +99,8 @@ func (c Client) Close(){
 
 
 func (client Client) StartClient(){
+	count := 0
+	stopTimer := time.After(time.Minute)
 	defer client.Close()
 	for {
 		for i := 0; i < serverCount; i++{
@@ -115,6 +118,14 @@ func (client Client) StartClient(){
 				panic(err)
 			}
 			fmt.Printf("Received  %d ack %s\n", i, string(buffer[:n]))
+		}
+		count += 1
+		select {
+		case <-stopTimer:
+			fmt.Printf("Sent %d messages\n", count)
+			return
+		default:
+			continue
 		}
 	}
 }
