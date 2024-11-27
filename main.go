@@ -61,6 +61,9 @@ func NewClient(ackIp string, ackPort int) Client{
 		Port: ackPort,
 	}
 	ackConn, err := net.ListenUDP("udp", &ackAddr)
+	if err != nil{
+		panic(err)
+	}
 
 	return Client{
 		ebpfAttachment: link,
