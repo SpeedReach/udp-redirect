@@ -165,7 +165,7 @@ func (s Server) Start(){
 		if err != nil{
 			panic(err)
 		}
-		fmt.Printf("Received message %s from %s\n", string(buffer[:n]), clientAddr)
+		fmt.Printf("%d Received  message %s from %s\n",s.Port, string(buffer[:n]), clientAddr)
 
 		_, err = s.ackConn.Write([]byte("Ack"))
 		if err != nil{
