@@ -86,6 +86,10 @@ int xdp_ack(struct xdp_md *ctx) {
 	bpf_xdp_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, check), &check,
 		sizeof(u16));
 	
+	header = try_parse_udp((void*) ctx->data ,(void*) ctx->data_end);
+	if (header.udp == NULL){
+		return XDP_PASS;
+	}
 	__u8 src_mac[6];
 	__u8 dst_mac[6];
 	for (int i=0 ;i<6;i++){
