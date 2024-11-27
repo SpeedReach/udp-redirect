@@ -30,7 +30,12 @@ struct hdr {
 
 static __always_inline struct hdr try_parse_udp(void* data, void* data_end);
 
+#define SERVER_COUNT 1
 
+__u16 redirect_port = 12346;
+__u16 server_ports[SERVER_COUNT] = {
+	12345,
+};
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
@@ -43,18 +48,22 @@ int tcdump(struct __sk_buff *ctx) {
 		bpf_printk("not udp packet\n");
 		return TC_ACT_OK;
 	}
+	if(header.udp->dest != bpf_htons(redirect_port)){
+		return TC_ACT_OK;
+	}
 
-	//print mac, addr, port,
-	bpf_printk("================tc===================\n");
-	bpf_printk("dest mac: %x:%x:%x:%x:%x:%x\n", header.eth->h_dest[0], header.eth->h_dest[1], header.eth->h_dest[2], header.eth->h_dest[3], header.eth->h_dest[4], header.eth->h_dest[5]);
-	bpf_printk("source mac: %x:%x:%x:%x:%x:%x\n", header.eth->h_source[0], header.eth->h_source[1], header.eth->h_source[2], header.eth->h_source[3], header.eth->h_source[4], header.eth->h_source[5]);
-	u32 daddr = header.ip->daddr;
-	u32 saddr = header.ip->saddr;
-	bpf_printk("dest addr: %d.%d.%d.%d\n", daddr & 0xFF, (daddr >> 8) & 0xFF, (daddr >> 16) & 0xFF, (daddr >> 24) & 0xFF);
-	bpf_printk("source addr: %d.%d.%d.%d\n", saddr & 0xFF, (saddr >> 8) & 0xFF, (saddr >> 16) & 0xFF, (saddr >> 24) & 0xFF);
-	bpf_printk("dest port: %d\n", bpf_ntohs(header.udp->dest));
-	bpf_printk("source port: %d\n", bpf_ntohs(header.udp->source));
-	bpf_printk("================tc===================\n");
+	int ret;
+	for (int i=0;i<SERVER_COUNT;i++){
+		uint16_t new_port = bpf_htons(server_ports[i]);
+		ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, dest), &new_port, sizeof(new_port), 0);
+		bpf_printk("replace port %d", ret);
+		
+		ret = bpf_clone_redirect(ctx, ctx->ifindex, 0);
+		bpf_printk("clone redirect %d", ret);
+
+		return TC_ACT_SHOT;
+	}
+
 	return TC_ACT_OK;
 }
 
