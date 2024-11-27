@@ -1,9 +1,11 @@
 package tc_redirect
 
 import (
+	"net"
+
+	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/rlimit"
-	"net"
 )
 
 type Attachment struct {
@@ -35,6 +37,7 @@ func AttachEbpf() Attachment {
 	xdpLink, err := link.AttachTCX(link.TCXOptions{
 		Interface: iface.Index,
 		Program:   objs.Tcdump,
+		Attach:    ebpf.AttachTCXEgress,
 	})
 
 	if err != nil {
