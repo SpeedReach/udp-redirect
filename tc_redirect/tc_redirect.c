@@ -32,7 +32,7 @@ static inline __u16 compute_ip_checksum(struct iphdr *ip, void *data_end);
 
 static __always_inline struct hdr try_parse_udp(void* data, void* data_end);
 
-#define SERVER_COUNT 1
+#define SERVER_COUNT 3
 
 __u16 redirect_port = 12345;
 __u16 server_ports[SERVER_COUNT] = {
