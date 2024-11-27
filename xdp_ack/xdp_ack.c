@@ -96,7 +96,7 @@ int xdp_ack(struct xdp_md *ctx) {
 	__u8 src_mac[6];
 	__u8 dst_mac[6];
 	for (int i=0 ;i<6;i++){
-		src_mac[i] = header.eth->h_source[i];
+		src_mac[i] = header.eth->h_dest[i];
 		dst_mac[i] = ack_mac[i];
 	}
 
