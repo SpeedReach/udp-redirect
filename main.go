@@ -17,9 +17,9 @@ var serverIp =[serverCount]string{
 }
 
 var serverPort = [serverCount]int{
-	12345,
 	12346,
 	12347,
+	12348,
 }
 
 const redirectPort = 12345
@@ -55,14 +55,14 @@ func NewClient(ackIp string, ackPort int) Client{
 	link := tc_redirect.AttachEbpf()
 	var broadcastConns []*net.UDPConn
 	for i := 0; i < serverCount; i++{
-		//addr := net.UDPAddr{
-		//	Port: redirectPort,
-		//	IP:   net.ParseIP(redirectIp),
-		//}
 		addr := net.UDPAddr{
-			Port: serverPort[i],
-			IP:   net.ParseIP(serverIp[i]),
+			Port: redirectPort,
+			IP:   net.ParseIP(redirectIp),
 		}
+		//addr := net.UDPAddr{
+		//	Port: serverPort[i],
+		//	IP:   net.ParseIP(serverIp[i]),
+		//}
 		broadcastConn, err := net.DialUDP("udp", nil, &addr)
 		if err != nil{
 			panic(err)
@@ -105,7 +105,7 @@ func (client Client) StartClient(){
 			if err != nil{
 				panic(err)
 			}
-			//break
+			break
 		}
 		//collect serverCount acks
 		for i := 0; i < serverCount; i++{

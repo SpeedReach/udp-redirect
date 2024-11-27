@@ -34,17 +34,22 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end);
 
 #define SERVER_COUNT 1
 
-__u16 redirect_port = 12346;
+__u16 redirect_port = 12345;
 __u16 server_ports[SERVER_COUNT] = {
-	12345,
+	12346,
+	12347,
+	12348,
 };
 //192.168.50.224
 __u32 server_ips[SERVER_COUNT]={
 	(192 << 24) | (168 << 16) | (50 << 8) | 224,
-
+	(192 << 24) | (168 << 16) | (50 << 8) | 224,
+	(192 << 24) | (168 << 16) | (50 << 8) | 224,
 };
 
 __u8 server_macs[SERVER_COUNT][6] = {
+	{0x9c, 0x2d, 0xcd, 0x3f, 0x67, 0xa4},
+	{0x9c, 0x2d, 0xcd, 0x3f, 0x67, 0xa4},
 	{0x9c, 0x2d, 0xcd, 0x3f, 0x67, 0xa4},
 };
 
