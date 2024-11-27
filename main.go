@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/SpeedReach/udp_redirect/tc_redirect"
+	"github.com/SpeedReach/udp_redirect/xdp_ack"
 )
 
 
@@ -145,9 +146,13 @@ type Server struct{
 	Port int
 	conn *net.UDPConn
 	ackConn *net.UDPConn
+	ebpfAttachment xdp_ack.Attachment
 }
 
 func NewServer(ip string, port int) Server{
+
+	link := xdp_ack.AttachEbpf()
+
 	addr := net.UDPAddr{
 		Port: port,
 		IP:   net.ParseIP(ip),
@@ -170,15 +175,19 @@ func NewServer(ip string, port int) Server{
 		Port: port,
 		conn: conn,
 		ackConn: ackConn,
+		ebpfAttachment: link,
 	}
 
 }
 
 func (s Server) Close(){
-	s.conn.Close()
+	defer s.conn.Close()
+	defer s.ackConn.Close()
+	defer s.ebpfAttachment.Close()
 }
 
 func (s Server) Start(){
+
 	buffer := make([]byte, 1024)
 	for {
 		n, clientAddr, err := s.conn.ReadFromUDP(buffer)
