@@ -40,7 +40,7 @@ func main(){
 		}
 		for {}
 	} else{
-		client := NewClient(ackIp, ackPort)
+		client := NewClient(ackIp, ackPort, false)
 		defer client.Close()
 		client.StartClient()
 	}
@@ -50,24 +50,31 @@ type Client struct{
 	broadcastConn []*net.UDPConn
 	ackConn *net.UDPConn
 	ebpfAttachment tc_redirect.Attachment
+	useEbpf bool
 }
 
-func NewClient(ackIp string, ackPort int) Client{
+func NewClient(ackIp string, ackPort int, useEbpf bool) Client{
 	link := tc_redirect.AttachEbpf()
 	var broadcastConns []*net.UDPConn
 	for i := 0; i < serverCount; i++{
-		//addr := net.UDPAddr{
-		//	Port: redirectPort,
-		//	IP:   net.ParseIP(redirectIp),
-		//}
-		addr := net.UDPAddr{
-			Port: serverPort[i],
-			IP:   net.ParseIP(serverIp[i]),
+		var addr net.UDPAddr
+		if useEbpf{
+			addr = net.UDPAddr{
+				Port: redirectPort,
+				IP:   net.ParseIP(redirectIp),
+			}
+		}else{
+			addr = net.UDPAddr{
+				Port: serverPort[i],
+				IP:   net.ParseIP(serverIp[i]),
+			}
 		}
+		
 		broadcastConn, err := net.DialUDP("udp", nil, &addr)
 		if err != nil{
 			panic(err)
 		}
+
 		broadcastConns = append(broadcastConns, broadcastConn)
 	}
 
@@ -108,7 +115,9 @@ func (client Client) StartClient(){
 			if err != nil{
 				panic(err)
 			}
-			//break
+			if client.useEbpf{
+				break
+			}
 		}
 		//collect serverCount acks
 		for i := 0; i < serverCount; i++{
