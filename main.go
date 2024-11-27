@@ -46,20 +46,28 @@ func main(){
 }
 
 type Client struct{
-	broadcastConn *net.UDPConn
+	broadcastConn []*net.UDPConn
 	ackConn *net.UDPConn
 	ebpfAttachment tc_redirect.Attachment
 }
 
 func NewClient(ackIp string, ackPort int) Client{
 	link := tc_redirect.AttachEbpf()
-	broadcastAddr := net.UDPAddr{
-		Port: redirectPort,
-		IP:   net.ParseIP(redirectIp),
-	}
-	broadcastConn, err := net.DialUDP("udp", nil, &broadcastAddr)
-	if err != nil{
-		panic(err)
+	var broadcastConns []*net.UDPConn
+	for i := 0; i < serverCount; i++{
+		//addr := net.UDPAddr{
+		//	Port: redirectPort,
+		//	IP:   net.ParseIP(redirectIp),
+		//}
+		addr := net.UDPAddr{
+			Port: serverPort[i],
+			IP:   net.ParseIP(serverIp[i]),
+		}
+		broadcastConn, err := net.DialUDP("udp", nil, &addr)
+		if err != nil{
+			panic(err)
+		}
+		broadcastConns = append(broadcastConns, broadcastConn)
 	}
 
 
@@ -75,24 +83,29 @@ func NewClient(ackIp string, ackPort int) Client{
 
 	return Client{
 		ebpfAttachment: link,
-		broadcastConn: broadcastConn,
+		broadcastConn: broadcastConns,
 		ackConn: ackConn,
 	}
 }
 
 func (c Client) Close(){
-	c.broadcastConn.Close()
-	c.ackConn.Close()
-	c.ebpfAttachment.Close()
+	defer	c.ackConn.Close()
+	defer	c.ebpfAttachment.Close()
+	for _, conn := range c.broadcastConn{
+		defer conn.Close()
+	}
 }
 
 
 func (client Client) StartClient(){
 	defer client.Close()
 	for {
-		_, err := client.broadcastConn.Write([]byte("Hiiiiiiiiiiiiiiiii"))
-		if err != nil{
-			panic(err)
+		for i := 0; i < serverCount; i++{
+			_, err := client.broadcastConn[i].Write([]byte("Hiiiiiiiiiiiiiiiii"))
+			if err != nil{
+				panic(err)
+			}
+			//break
 		}
 		//collect serverCount acks
 		for i := 0; i < serverCount; i++{
