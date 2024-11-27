@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/SpeedReach/udp_redirect/tc_redirect"
+	//"github.com/SpeedReach/udp_redirect/tc_redirect"
 )
 
 const serverIp = "192.168.50.224"
 const serverPort = 12345
 const redirectPort = 12346
+const redirectIp = "192.168.50.223"
 
 func main(){
 	isServer := flag.Bool("server", false, "true")
@@ -28,7 +29,7 @@ func StartClient(){
 	
 	addr := net.UDPAddr{
 		Port: redirectPort,
-		IP:   net.ParseIP(serverIp),
+		IP:   net.ParseIP(redirectIp),
 	}
 
 	conn, err := net.DialUDP("udp", nil, &addr)

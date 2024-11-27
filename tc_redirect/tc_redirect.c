@@ -27,6 +27,8 @@ struct hdr {
 	struct udphdr* udp;
 };
 
+static inline __u16 compute_ip_checksum(struct iphdr *ip, void *data_end);
+
 
 static __always_inline struct hdr try_parse_udp(void* data, void* data_end);
 
@@ -36,6 +38,12 @@ __u16 redirect_port = 12346;
 __u16 server_ports[SERVER_COUNT] = {
 	12345,
 };
+//192.168.50.224
+__u32 server_ips[SERVER_COUNT]={
+	(192 << 24) | (168 << 16) | (50 << 8) | 224,
+
+};
+
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
@@ -57,7 +65,22 @@ int tcdump(struct __sk_buff *ctx) {
 		uint16_t new_port = bpf_htons(server_ports[i]);
 		ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, dest), &new_port, sizeof(new_port), 0);
 		bpf_printk("replace port %d", ret);
+
+		uint32_t new_daddr = bpf_htonl(server_ips[i]);
+		ret	= bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, daddr), &new_daddr,
+				sizeof(u32), 0);
+		bpf_printk("replace ip %d", ret);
+
+		Elf32_Half check = 0;
+		bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, check), &check,
+			sizeof(u16), 0);
+		header = try_parse_udp((void*) ctx->data ,(void*) ctx->data_end);
+		if (header.udp != NULL)
+			check = compute_ip_checksum(header.ip, (void*) ctx->data_end);
+		bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, check), &check,
+			sizeof(u16), 0);
 		
+
 		ret = bpf_clone_redirect(ctx, ctx->ifindex, 0);
 		bpf_printk("clone redirect %d", ret);
 
@@ -97,3 +120,22 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 }
 
 
+
+
+static inline __u16 compute_ip_checksum(struct iphdr *ip, void *data_end) {
+    __u16 *next_ip_u16 = (__u16 *)ip;
+    __u16 *end = (__u16 *)data_end;
+    __u32 csum = 0;
+
+    // Ensure that `ip` is valid and does not cross data_end
+    if ((void *)next_ip_u16 + sizeof(*ip) > data_end) {
+        return 0; // Invalid access, return 0
+    }
+
+    #pragma clang loop unroll(full)
+    for (int i = 0; i < (sizeof(*ip) >> 1); i++) {
+        csum += *next_ip_u16++;
+    }
+
+    return ~((csum & 0xffff) + (csum >> 16));
+}
