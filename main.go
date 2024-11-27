@@ -60,10 +60,7 @@ func NewClient(ackIp string, ackPort int) Client{
 		IP: net.IP(ackIp),
 		Port: ackPort,
 	}
-	ackConn, err := net.DialUDP("udp", nil, &ackAddr)
-	if err != nil{
-		panic(err)
-	}
+	ackConn, err := net.ListenUDP("udp", &ackAddr)
 
 	return Client{
 		ebpfAttachment: link,
