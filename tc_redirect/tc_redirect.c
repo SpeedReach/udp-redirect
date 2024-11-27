@@ -94,10 +94,10 @@ int tcdump(struct __sk_buff *ctx) {
 		ret = bpf_clone_redirect(ctx, ctx->ifindex, 0);
 		bpf_printk("clone redirect %d", ret);
 
-		return TC_ACT_SHOT;
+		
 	}
 
-	return TC_ACT_OK;
+	return TC_ACT_SHOT;
 }
 
 
