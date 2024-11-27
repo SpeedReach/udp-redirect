@@ -107,7 +107,7 @@ func (c Client) Close(){
 
 func (client Client) StartClient(){
 	count := 0
-	stopTimer := time.After(time.Second * 30)
+	stopTimer := time.After(time.Second * 10)
 	defer client.Close()
 	for {
 		for i := 0; i < serverCount; i++{
