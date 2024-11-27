@@ -10,6 +10,7 @@ import (
 
 const serverIp = "192.168.50.224"
 const serverPort = 12345
+const redirectPort = 12346
 
 func main(){
 	isServer := flag.Bool("server", false, "true")
@@ -22,11 +23,11 @@ func main(){
 }
 
 func StartClient(){
-	link := tc_redirect.AttachEbpf()
-	defer link.Close()
+	//link := tc_redirect.AttachEbpf()
+	//defer link.Close()
 	
 	addr := net.UDPAddr{
-		Port: serverPort,
+		Port: redirectPort,
 		IP:   net.ParseIP(serverIp),
 	}
 
