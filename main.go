@@ -32,7 +32,12 @@ func main(){
 	isServer := flag.Bool("server", false, "true")
 	flag.Parse()
 	if *isServer{
-		StartServer()
+		for i := 0; i < serverCount; i++{
+			server := NewServer(serverIp[i], serverPort[i])
+			defer server.Close()
+			go server.Start()
+		}
+		for {}
 	} else{
 		client := NewClient(ackIp, ackPort)
 		defer client.Close()
@@ -156,13 +161,3 @@ func (s Server) Start(){
 	}
 }
 
-
-func StartServer(){
-	servers := make([]Server, serverCount)
-	for i := 0; i < serverCount; i++{
-		servers[i] = NewServer(serverIp[i], serverPort[i])
-		defer servers[i].Close()
-		go servers[i].Start()
-	}
-	select{}
-}
