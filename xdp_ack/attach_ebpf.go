@@ -2,7 +2,7 @@ package xdp_ack
 
 import (
 	"net"
-	
+
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/rlimit"
 )

@@ -56,6 +56,10 @@ int xdp_ack(struct xdp_md *ctx) {
 			break;
 		}
 	}
+	if(is_target){
+		is_target = header.ip->saddr == bpf_htonl(ack_ip);
+		bpf_printk("is_target %d", is_target);
+	}
 	if(!is_target){
 		return XDP_PASS;
 	}
