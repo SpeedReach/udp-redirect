@@ -151,7 +151,7 @@ type Server struct{
 
 func NewServer(ip string, port int) Server{
 
-	link := xdp_ack.AttachEbpf()
+	//link := xdp_ack.AttachEbpf()
 
 	addr := net.UDPAddr{
 		Port: port,
@@ -175,7 +175,7 @@ func NewServer(ip string, port int) Server{
 		Port: port,
 		conn: conn,
 		ackConn: ackConn,
-		ebpfAttachment: link,
+		//ebpfAttachment: link,
 	}
 
 }
