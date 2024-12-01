@@ -110,7 +110,7 @@ func (c Client) Close(){
 	}
 }
 
-const packetSize = 50
+const packetSize = 3200
 
 
 func (client Client) StartClient(){
