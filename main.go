@@ -99,6 +99,7 @@ func NewClient(ackIp string, ackPort int, useEbpf bool) Client{
 		ebpfAttachment: link,
 		broadcastConn: broadcastConns,
 		ackConn: ackConn,
+		useEbpf: useEbpf,
 	}
 }
 
