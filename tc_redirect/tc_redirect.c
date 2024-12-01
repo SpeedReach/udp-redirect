@@ -81,7 +81,8 @@ int tcdump(struct __sk_buff *ctx) {
 		update_port = true;
 		u16 id = header.ip->id;
 		int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
-		bpf_printk("update ip %d", ret);
+		
+		bpf_printk("update ip  %d %d %d", id, ret, header.udp->len);
 	} 
 	
 	if(header.ip != NULL && bpf_ntohl(header.ip->daddr) == redirect_addr){
@@ -89,6 +90,7 @@ int tcdump(struct __sk_buff *ctx) {
 		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
 			return TC_ACT_OK;
 		}
+		
 		bpf_printk("found ip %d", id);
 	}
 	else{
