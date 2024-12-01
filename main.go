@@ -110,6 +110,8 @@ func (c Client) Close(){
 	}
 }
 
+packetSize := 50
+
 
 func (client Client) StartClient(){
 	count := 0
@@ -117,8 +119,8 @@ func (client Client) StartClient(){
 	defer client.Close()
 	for {
 		for i := 0; i < serverCount; i++{
-			var arr = make([]byte, 3200)
-			for j := 0; j < 3200; j++{
+			var arr = make([]byte, packetSize)
+			for j := 0; j < packetSize; j++{
 				arr[j] = 'H'
 			}
 			_, err := client.broadcastConn[i].Write(arr)
@@ -194,7 +196,7 @@ func (s Server) Close(){
 
 func (s Server) Start(){
 
-	buffer := make([]byte, 3200)
+	buffer := make([]byte, packetSize)
 	for {
 		n, clientAddr, err := s.conn.ReadFromUDP(buffer)
 		if err != nil{
@@ -202,7 +204,7 @@ func (s Server) Start(){
 		}
 		mes := string(buffer[:n])
 		
-		for i := 0; i < 3200; i++{
+		for i := 0; i < packetSize; i++{
 			if(mes[i] != 'H'){
 				panic(fmt.Sprintf("Not H at %d", i))
 			}
