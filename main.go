@@ -46,7 +46,7 @@ func main(){
 		//defer link.Close()
 		for {}
 	} else{
-		client := NewClient(ackIp, ackPort, false)
+		client := NewClient(ackIp, ackPort, true)
 		defer client.Close()
 		client.StartClient()
 	}
