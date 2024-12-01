@@ -117,8 +117,8 @@ func (client Client) StartClient(){
 	defer client.Close()
 	for {
 		for i := 0; i < serverCount; i++{
-			var arr = make([]byte, 100000)
-			for j := 0; j < 100000; j++{
+			var arr = make([]byte, 10000)
+			for j := 0; j < 10000; j++{
 				arr[j] = 'H'
 			}
 			_, err := client.broadcastConn[i].Write(arr)
@@ -202,7 +202,7 @@ func (s Server) Start(){
 		}
 		mes := string(buffer[:n])
 		
-		for i := 0; i < 100000; i++{
+		for i := 0; i < 10000; i++{
 			if(mes[i] != 'H'){
 				panic(fmt.Sprintf("Not H at %d", i))
 			}
