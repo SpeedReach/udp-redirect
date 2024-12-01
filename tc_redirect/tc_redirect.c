@@ -79,7 +79,8 @@ int tcdump(struct __sk_buff *ctx) {
 		}
 		update_port = true;
 		u16 id = header.ip->id;
-		bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
+		int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
+		bpf_printk("update ip %d", ret);
 	}
 	else if(header.ip != NULL){
 		u16 id = header.ip->id;
