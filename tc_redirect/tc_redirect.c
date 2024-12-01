@@ -66,7 +66,6 @@ struct {
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
-	bpf_printk("wwwwwwwwwwwwwwww");
 	void* data = (void*)(long)ctx->data;
 	void* data_end = (void*)(long)ctx->data_end;
 
