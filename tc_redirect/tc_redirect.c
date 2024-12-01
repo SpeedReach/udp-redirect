@@ -66,6 +66,7 @@ struct {
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
+	bpf_printk("wwwwwwwwwwwwwwww");
 	void* data = (void*)(long)ctx->data;
 	void* data_end = (void*)(long)ctx->data_end;
 
@@ -86,6 +87,7 @@ int tcdump(struct __sk_buff *ctx) {
 		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
 			return TC_ACT_OK;
 		}
+		bpf_printk("found ip %d", id);
 	}
 	else{
 		return TC_ACT_OK;
@@ -108,7 +110,7 @@ int tcdump(struct __sk_buff *ctx) {
 		bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, check), &check,
 			sizeof(u16), 0);
 		header = try_parse_udp((void*) ctx->data ,(void*) ctx->data_end);
-		if (header.udp != NULL)
+		if (header.ip != NULL)
 			check = compute_ip_checksum(header.ip, (void*) ctx->data_end);
 		bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, check), &check,
 			sizeof(u16), 0);

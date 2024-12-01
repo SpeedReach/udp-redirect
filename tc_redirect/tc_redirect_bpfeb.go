@@ -60,6 +60,7 @@ type tc_redirectProgramSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type tc_redirectMapSpecs struct {
+	DestMap *ebpf.MapSpec `ebpf:"dest_map"`
 }
 
 // tc_redirectObjects contains all objects after they have been loaded into the kernel.
@@ -81,10 +82,13 @@ func (o *tc_redirectObjects) Close() error {
 //
 // It can be passed to loadTc_redirectObjects or ebpf.CollectionSpec.LoadAndAssign.
 type tc_redirectMaps struct {
+	DestMap *ebpf.Map `ebpf:"dest_map"`
 }
 
 func (m *tc_redirectMaps) Close() error {
-	return _Tc_redirectClose()
+	return _Tc_redirectClose(
+		m.DestMap,
+	)
 }
 
 // tc_redirectPrograms contains all programs after they have been loaded into the kernel.
