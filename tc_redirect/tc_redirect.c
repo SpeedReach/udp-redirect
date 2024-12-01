@@ -82,9 +82,6 @@ int tcdump(struct __sk_buff *ctx) {
 
 	bool update_port = false;
 
-	if(header.ip != NULL){
-		extract_flags(header.ip->frag_off);
-	}
 
 	if(header.udp != NULL){
 		if(header.udp->dest != bpf_htons(redirect_port)){
@@ -100,7 +97,7 @@ int tcdump(struct __sk_buff *ctx) {
 		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
 			return TC_ACT_OK;
 		}
-		
+		extract_flags(header.ip->frag_off);
 		bpf_printk("found ip %d", id);
 	}
 	else{
