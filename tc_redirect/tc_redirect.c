@@ -62,12 +62,18 @@ struct {
 } dest_map SEC(".maps");
 
 
-static __always_inline void  extract_flags(uint16_t frag_off) {
-    // Mask and extract the flags
-    uint16_t flags = frag_off & bpf_htons(0xE000); // Top 3 bits
-    uint8_t reserved = (flags & bpf_htons(0x8000)) >> 15; // Bit 13
-    uint8_t df = (flags & bpf_htons(0x4000)) >> 14;       // Bit 14
-    uint8_t mf = (flags & bpf_htons(0x2000)) >> 13;       // Bit 15
+
+
+static __always_inline void extract_flags(uint16_t frag_off) {
+    // The flags are in the first 3 bits (bits 15-13)
+    // No need for htons() in the mask since we're extracting from an already network-ordered value
+    uint16_t flags = (frag_off & 0xE000);
+    
+    // Right shift to get individual flags
+    // Note: frag_off is already in network byte order, so we shift from the correct position
+    uint8_t reserved = (flags >> 15) & 0x1; // Bit 15 (leftmost)
+    uint8_t df = (flags >> 14) & 0x1;       // Bit 14
+    uint8_t mf = (flags >> 13) & 0x1;       // Bit 13
 
     bpf_printk("Reserved: %u, DF: %u, MF: %u\n", reserved, df, mf);
 }
