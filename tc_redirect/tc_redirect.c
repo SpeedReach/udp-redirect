@@ -65,6 +65,7 @@ struct {
 
 
 static __always_inline void extract_flags(uint16_t frag_off) {
+	frag_off = bpf_htons(frag_off);
     // The flags are in the first 3 bits (bits 15-13)
     // No need for htons() in the mask since we're extracting from an already network-ordered value
     uint16_t flags = (frag_off & 0xE000);
