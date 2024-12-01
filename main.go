@@ -8,7 +8,6 @@ import (
 
 	"github.com/SpeedReach/udp_redirect/tc_redirect"
 	"github.com/SpeedReach/udp_redirect/xdp_ack"
-	"github.com/stretchr/testify/assert"
 )
 
 
