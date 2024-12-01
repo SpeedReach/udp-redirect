@@ -8,6 +8,7 @@ import (
 
 	"github.com/SpeedReach/udp_redirect/tc_redirect"
 	"github.com/SpeedReach/udp_redirect/xdp_ack"
+	"github.com/stretchr/testify/assert"
 )
 
 
@@ -34,7 +35,7 @@ func main(){
 	isServer := flag.Bool("server", false, "true")
 	flag.Parse()
 	if *isServer{
-		link := xdp_ack.AttachEbpf()
+		//link := xdp_ack.AttachEbpf()
 
 		for i := 0; i < serverCount; i++{
 			server := NewServer(serverIp[i], serverPort[i])
@@ -43,7 +44,7 @@ func main(){
 				server.Start()
 			}()
 		}
-		defer link.Close()
+		//defer link.Close()
 		for {}
 	} else{
 		client := NewClient(ackIp, ackPort, false)
@@ -117,7 +118,11 @@ func (client Client) StartClient(){
 	defer client.Close()
 	for {
 		for i := 0; i < serverCount; i++{
-			_, err := client.broadcastConn[i].Write([]byte("Hiiiiiiiiiiiiiiiii"))
+			var arr = make([]byte, 4096)
+			for j := 0; j < 4096; j++{
+				arr[j] = 'H'
+			}
+			_, err := client.broadcastConn[i].Write(arr)
 			if err != nil{
 				panic(err)
 			}
@@ -156,8 +161,6 @@ type Server struct{
 
 func NewServer(ip string, port int) Server{
 
-	
-
 	addr := net.UDPAddr{
 		Port: port,
 		IP:   net.ParseIP(ip),
@@ -192,13 +195,21 @@ func (s Server) Close(){
 
 func (s Server) Start(){
 
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, 4096)
 	for {
 		n, clientAddr, err := s.conn.ReadFromUDP(buffer)
 		if err != nil{
 			panic(err)
 		}
-		fmt.Printf("%d Received  message %s from %s\n",s.Port, string(buffer[:n]), clientAddr)
+		mes := string(buffer[:n])
+		
+		for i := 0; i < 4096; i++{
+			if(mes[i] != 'H'){
+				panic(fmt.Sprintf("Not H at %d", i))
+			}
+		}
+
+		println("Received message from ", clientAddr.String())
 
 		_, err = s.ackConn.Write([]byte("Ack"))
 		if err != nil{

@@ -102,6 +102,9 @@ int tcdump(struct __sk_buff *ctx) {
 
 
 
+
+
+
 static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 	if(data + ETH_SIZE > data_end)
 		return (struct hdr) {NULL,NULL, NULL};
@@ -148,3 +151,6 @@ static inline __u16 compute_ip_checksum(struct iphdr *ip, void *data_end) {
 
     return ~((csum & 0xffff) + (csum >> 16));
 }
+
+
+
