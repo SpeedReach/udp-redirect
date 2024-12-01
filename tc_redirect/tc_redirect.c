@@ -62,7 +62,15 @@ struct {
 } dest_map SEC(".maps");
 
 
+static __always_inline void  extract_flags(uint16_t frag_off) {
+    // Mask and extract the flags
+    uint16_t flags = frag_off & bpf_htons(0xE000); // Top 3 bits
+    uint8_t reserved = (flags & bpf_htons(0x8000)) >> 15; // Bit 13
+    uint8_t df = (flags & bpf_htons(0x4000)) >> 14;       // Bit 14
+    uint8_t mf = (flags & bpf_htons(0x2000)) >> 13;       // Bit 15
 
+    bpf_printk("Reserved: %u, DF: %u, MF: %u\n", reserved, df, mf);
+}
 
 
 SEC("tc")
@@ -73,6 +81,10 @@ int tcdump(struct __sk_buff *ctx) {
 	struct hdr header = try_parse_udp(data, data_end);
 
 	bool update_port = false;
+
+	if(header.ip != NULL){
+		extract_flags(header.ip->frag_off);
+	}
 
 	if(header.udp != NULL){
 		if(header.udp->dest != bpf_htons(redirect_port)){
