@@ -194,7 +194,7 @@ func (s Server) Close(){
 
 func (s Server) Start(){
 
-	buffer := make([]byte, 100000)
+	buffer := make([]byte, 10000)
 	for {
 		n, clientAddr, err := s.conn.ReadFromUDP(buffer)
 		if err != nil{
