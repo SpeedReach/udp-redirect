@@ -53,6 +53,16 @@ __u8 server_macs[SERVER_COUNT][6] = {
 	{0x9c, 0x2d, 0xcd, 0x3f, 0x67, 0xa4},
 };
 
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, 1000);
+	__type(key, __u16);
+	__type(value, __u16);
+} dest_map SEC(".maps");
+
+
+
+
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
@@ -61,19 +71,34 @@ int tcdump(struct __sk_buff *ctx) {
 
 	struct hdr header = try_parse_udp(data, data_end);
 
-	if (header.udp == NULL) {
+	bool update_port = false;
+
+	if(header.udp != NULL){
+		if(header.udp->dest != bpf_htons(redirect_port)){
+			return TC_ACT_OK;
+		}
+		update_port = true;
+		u16 id = header.ip->id;
+		bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
+	}
+	else if(header.ip != NULL){
+		u16 id = header.ip->id;
+		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
+			return TC_ACT_OK;
+		}
+	}
+	else{
 		return TC_ACT_OK;
 	}
-	if(header.udp->dest != bpf_htons(redirect_port)){
-		return TC_ACT_OK;
-	}
+
 
 	int ret;
 	for (int i=0;i<SERVER_COUNT;i++){
-		uint16_t new_port = bpf_htons(server_ports[i]);
-		ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, dest), &new_port, sizeof(new_port), 0);
-		bpf_printk("replace port %d", ret);
-
+		if(update_port){
+			uint16_t new_port = bpf_htons(server_ports[i]);
+			ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, dest), &new_port, sizeof(new_port), 0);
+			bpf_printk("replace port %d", ret);
+		}
 		uint32_t new_daddr = bpf_htonl(server_ips[i]);
 		ret	= bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, daddr), &new_daddr,
 				sizeof(u32), 0);
