@@ -35,6 +35,7 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end);
 #define SERVER_COUNT 3
 
 __u16 redirect_port = 12345;
+__u32 redirect_addr = (192 << 24) | (168 << 16) | (50 << 8) | 230;
 __u16 server_ports[SERVER_COUNT] = {
 	12346,
 	12347,
@@ -82,7 +83,8 @@ int tcdump(struct __sk_buff *ctx) {
 		int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
 		bpf_printk("update ip %d", ret);
 	}
-	else if(header.ip != NULL){
+	else if(header.ip != NULL && bpf_ntohl(header.ip->daddr) == redirect_addr){
+		bpf_printk("wwwww %d %d" , header.ip->id, header.ip->frag_off)
 		u16 id = header.ip->id;
 		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
 			return TC_ACT_OK;
