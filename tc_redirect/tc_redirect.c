@@ -84,7 +84,7 @@ int tcdump(struct __sk_buff *ctx) {
 		bpf_printk("update ip %d", ret);
 	} 
 	
-	if(header.ip != NULL){ //&& bpf_ntohl(header.ip->daddr) == redirect_addr){
+	if(header.ip != NULL && bpf_ntohl(header.ip->daddr) == redirect_addr){
 		bpf_printk("wwwww %d %d" , header.ip->id, header.ip->frag_off);
 		u16 id = header.ip->id;
 		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
