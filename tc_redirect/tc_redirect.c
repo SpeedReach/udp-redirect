@@ -70,20 +70,19 @@ typedef struct ip_flags_t {
 
 
 static __always_inline struct ip_flags_t extract_flags(uint16_t frag_off) {
-	frag_off = bpf_htons(frag_off);
-    // The flags are in the first 3 bits (bits 15-13)
-    // No need for htons() in the mask since we're extracting from an already network-ordered value
-    uint16_t flags = frag_off;
+    // Convert to network byte order once
+    uint16_t flags = bpf_htons(frag_off);
+    struct ip_flags_t flags_struct;
     
-    // Right shift to get individual flags
-    // Note: frag_off is already in network byte order, so we shift from the correct position
-	struct ip_flags_t flags_struct;
-	flags_struct.df = (flags >> 14) & 0x1;       // Bit 14
-	flags_struct.mf = (flags >> 13) & 0x1;       // Bit 13
-	//flags_struct.offset = flags & 0x1FFF;     // Bits 0-12 (rightmost)
-
-	bpf_printk("flags %u %u", flags_struct.df, flags_struct.mf);//, flags_struct.offset);
-	return flags_struct;
+    // After byte order conversion, the flags are now in:
+    // DF: bit 1 (second from right of left byte)
+    // MF: bit 0 (rightmost bit of left byte)
+    // Offset: remaining 13 bits
+    flags_struct.df = (flags >> 1) & 0x1;
+    flags_struct.mf = flags & 0x1;
+    flags_struct.offset = (flags >> 3) & 0x1FFF;
+    
+    return flags_struct;
 }
 
 
@@ -174,6 +173,8 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 	}
 
 	struct ip_flags_t flags = extract_flags(ip->frag_off);
+	bpf_printk("flags %d %d %d", flags.df, flags.mf, flags.offset);
+
 	if(flags.offset != 0){
 		return (struct hdr) {eth,ip, NULL};
 	}
