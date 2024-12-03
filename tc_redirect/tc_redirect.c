@@ -109,12 +109,10 @@ int tcdump(struct __sk_buff *ctx) {
 		bpf_printk("update ip  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
 		extract_flags(header.ip->frag_off);
 	} else if(header.ip != NULL){
-		bpf_printk("wwww %d ", header.ip->id);
 		u16 id = header.ip->id;
 		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
 			return TC_ACT_OK;
 		}
-		extract_flags(header.ip->frag_off);
 		bpf_printk("found ip %d", id);
 	}
 	else{
