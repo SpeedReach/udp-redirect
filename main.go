@@ -134,7 +134,6 @@ func (client Client) StartClient(){
 		}
 		//collect serverCount acks
 		for i := 0; i < serverCount; i++{
-			break
 			buffer := make([]byte, 1024)
 			n, _, err := client.ackConn.ReadFromUDP(buffer)
 			if err != nil{
