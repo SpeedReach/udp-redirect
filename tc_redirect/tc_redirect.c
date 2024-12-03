@@ -78,9 +78,10 @@ static __always_inline struct ip_flags_t extract_flags(uint16_t frag_off) {
     // DF: bit 1 (second from right of left byte)
     // MF: bit 0 (rightmost bit of left byte)
     // Offset: remaining 13 bits
-    flags_struct.df = (flags >> 1) & 0x1;
-    flags_struct.mf = flags & 0x1;
-    flags_struct.offset = (flags >> 3) & 0x1FFF;
+	uint8_t df = (flags >> 14) & 1;
+	uint8_t mf = (flags >> 13) & 1;
+	uint16_t offset = flags & 0x1FFF;
+	bpf_printk("flags %d %d %d", df, mf, offset);
     
     return flags_struct;
 }
