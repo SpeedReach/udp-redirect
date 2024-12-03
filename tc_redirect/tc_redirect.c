@@ -62,11 +62,11 @@ struct {
 } dest_map SEC(".maps");
 
 
-typedef struct ip_flags_t {
+struct ip_flags_t {
 	uint8_t df;
 	uint8_t mf;
 	uint16_t offset;
-} ;
+};
 
 
 static __always_inline struct ip_flags_t extract_flags(uint16_t frag_off) {
@@ -81,7 +81,7 @@ static __always_inline struct ip_flags_t extract_flags(uint16_t frag_off) {
 	uint8_t df = (flags >> 14) & 1;
 	uint8_t mf = (flags >> 13) & 1;
 	uint16_t offset = flags & 0x1FFF;
-	bpf_printk("flags %d %d %d", df, mf, offset);
+	bpf_printk("flags sss %d %d %d", df, mf, offset);
     
     return flags_struct;
 }
