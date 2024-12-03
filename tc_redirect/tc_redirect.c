@@ -62,9 +62,15 @@ struct {
 } dest_map SEC(".maps");
 
 
+struct ip_flags {
+	uint8_t reserved;
+	uint8_t df;
+	uint8_t mf;
+	uint16_t offset;
+};
 
 
-static __always_inline void extract_flags(uint16_t frag_off) {
+static __always_inline struct ip_flags extract_flags(uint16_t frag_off) {
 	frag_off = bpf_htons(frag_off);
     // The flags are in the first 3 bits (bits 15-13)
     // No need for htons() in the mask since we're extracting from an already network-ordered value
@@ -76,7 +82,7 @@ static __always_inline void extract_flags(uint16_t frag_off) {
     uint8_t df = (flags >> 14) & 0x1;       // Bit 14
     uint8_t mf = (flags >> 13) & 0x1;       // Bit 13
 	uint16_t offset = (flags >> 3) & 0x1FFF;
-    bpf_printk("Reserved: %u, DF: %u, MF: %u\n Offset: %u", reserved, df, mf, offset);
+	return (struct ip_flags){reserved, df, mf, offset};
 }
 
 
@@ -90,36 +96,30 @@ int tcdump(struct __sk_buff *ctx) {
 		return TC_ACT_OK;
 	}
 
-	bool update_port = false;
+	bool is_udp_following = true;
+	bool is_udp_head = false;
 	if(header.ip->protocol == IP_P_UDP){
-		extract_flags(header.ip->frag_off);
+		struct ip_flags flags =  extract_flags(header.ip->frag_off);
+		if(flags.offset != 0 && bpf_map_lookup_elem(&dest_map, &header.ip->id) != NULL){
+			is_udp_following = true;
+		}
 	}
 
-	if(header.udp != NULL){
-		if(header.udp->dest != bpf_htons(redirect_port)){
-			return TC_ACT_OK;
-		}
-		update_port = true;
+	if(header.udp != NULL && header.udp->dest == bpf_htons(redirect_port)){
+		is_udp_head = true;
 		u16 id = header.ip->id;
 		int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
-		
-		bpf_printk("update ip  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
-	} else if(header.ip != NULL && header.ip->daddr == bpf_htonl(redirect_addr)){
-		bpf_printk("wwww %d ", header.ip->id);
-		u16 id = header.ip->id;
-		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
-			return TC_ACT_OK;
-		}
-		bpf_printk("found ip %d", id);
-	}
-	else{
-		return TC_ACT_OK;
+		bpf_printk("update map  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
 	}
 
+	if(!is_udp_following && !is_udp_head){
+		return TC_ACT_OK;
+	}
+	bpf_printk("redirect %d %d", is_udp_following, is_udp_head);
 
 	int ret;
 	for (int i=0;i<SERVER_COUNT;i++){
-		if(update_port){
+		if(is_udp_head){
 			uint16_t new_port = bpf_htons(server_ports[i]);
 			ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, dest), &new_port, sizeof(new_port), 0);
 			bpf_printk("replace port %d", ret);
