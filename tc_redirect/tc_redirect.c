@@ -75,8 +75,9 @@ static __always_inline void extract_flags(uint16_t frag_off) {
     uint8_t reserved = (flags >> 15) & 0x1; // Bit 15 (leftmost)
     uint8_t df = (flags >> 14) & 0x1;       // Bit 14
     uint8_t mf = (flags >> 13) & 0x1;       // Bit 13
+	uint16_t offset = frag_off & 0x1FFF; // The last 13 bits are the offset
 
-    bpf_printk("Reserved: %u, DF: %u, MF: %u\n", reserved, df, mf);
+    bpf_printk("Reserved: %u, DF: %u, MF: %u\n Offset: %u", reserved, df, mf, offset);
 }
 
 
