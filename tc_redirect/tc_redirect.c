@@ -168,8 +168,10 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 	if(ip->protocol != IP_P_UDP){
 		return (struct hdr) {eth,ip, NULL};
 	}
+	if(ip){
 
 	bpf_printk("protocol %d", ip->protocol);
+	}
 	
 	if(data + ETH_SIZE + IP_SIZE + UDP_SIZE > data_end)
 		return (struct hdr) {eth,ip, NULL};
