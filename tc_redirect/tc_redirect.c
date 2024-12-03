@@ -86,9 +86,14 @@ int tcdump(struct __sk_buff *ctx) {
 	void* data_end = (void*)(long)ctx->data_end;
 
 	struct hdr header = try_parse_udp(data, data_end);
+	if(header.ip == NULL){
+		return TC_ACT_OK;
+	}
 
 	bool update_port = false;
-
+	if(header.ip->protocol == IP_P_UDP){
+		extract_flags(header.ip->frag_off);
+	}
 
 	if(header.udp != NULL){
 		if(header.udp->dest != bpf_htons(redirect_port)){
@@ -99,14 +104,12 @@ int tcdump(struct __sk_buff *ctx) {
 		int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
 		
 		bpf_printk("update ip  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
-		extract_flags(header.ip->frag_off);
 	} else if(header.ip != NULL && header.ip->daddr == bpf_htonl(redirect_addr)){
 		bpf_printk("wwww %d ", header.ip->id);
 		u16 id = header.ip->id;
 		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
 			return TC_ACT_OK;
 		}
-		extract_flags(header.ip->frag_off);
 		bpf_printk("found ip %d", id);
 	}
 	else{
@@ -167,10 +170,6 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 
 	if(ip->protocol != IP_P_UDP){
 		return (struct hdr) {eth,ip, NULL};
-	}
-	if(ip){
-
-	bpf_printk("protocol %d", ip->protocol);
 	}
 	
 	if(data + ETH_SIZE + IP_SIZE + UDP_SIZE > data_end)
