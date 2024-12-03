@@ -173,7 +173,7 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 	}
 
 	struct ip_flags_t flags = extract_flags(ip->frag_off);
-	bpf_printk("flags %d ", flags.offset);
+	//bpf_printk("flags %d ", flags.offset);
 
 	if(flags.offset != 0){
 		return (struct hdr) {eth,ip, NULL};
