@@ -62,12 +62,6 @@ struct {
 } dest_map SEC(".maps");
 
 
-struct ip_flags_t {
-	uint8_t df;
-	uint8_t mf;
-	uint16_t offset;
-};
-
 
 
 static __always_inline void extract_flags(uint16_t frag_off) {
@@ -81,7 +75,6 @@ static __always_inline void extract_flags(uint16_t frag_off) {
     uint8_t reserved = (flags >> 15) & 0x1; // Bit 15 (leftmost)
     uint8_t df = (flags >> 14) & 0x1;       // Bit 14
     uint8_t mf = (flags >> 13) & 0x1;       // Bit 13
-	//uint16_t offset = frag_off & 0x1FFF; // 13 bits for offset
 
     bpf_printk("Reserved: %u, DF: %u, MF: %u\n", reserved, df, mf);
 }
@@ -107,11 +100,13 @@ int tcdump(struct __sk_buff *ctx) {
 		
 		bpf_printk("update ip  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
 		extract_flags(header.ip->frag_off);
-	} else if(header.ip != NULL){
+	} else if(header.ip != NULL && header.ip->daddr == bpf_htonl(redirect_addr)){
+		bpf_printk("wwww %d ", header.ip->id);
 		u16 id = header.ip->id;
 		if(bpf_map_lookup_elem(&dest_map, &id) == NULL){
 			return TC_ACT_OK;
 		}
+		extract_flags(header.ip->frag_off);
 		bpf_printk("found ip %d", id);
 	}
 	else{
@@ -172,19 +167,13 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 	if(ip->protocol != IP_P_UDP){
 		return (struct hdr) {eth,ip, NULL};
 	}
-
-	extract_flags(ip->frag_off);
-	//bpf_printk("flags %d ", flags.offset);
-
-	//if(flags.offset != 0){
-	//	return (struct hdr) {eth,ip, NULL};
-	//}
 	
 	if(data + ETH_SIZE + IP_SIZE + UDP_SIZE > data_end)
 		return (struct hdr) {eth,ip, NULL};
 	
 	struct udphdr* udp = data + ETH_SIZE + IP_SIZE;
 
+	
 
 	return (struct hdr){eth,ip, udp};
 }
@@ -209,6 +198,5 @@ static inline __u16 compute_ip_checksum(struct iphdr *ip, void *data_end) {
 
     return ~((csum & 0xffff) + (csum >> 16));
 }
-
 
 
