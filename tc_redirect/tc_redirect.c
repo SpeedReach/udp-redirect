@@ -164,11 +164,13 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 		return (struct hdr) {eth,NULL, NULL};
 	
 	struct iphdr* ip = data + ETH_SIZE;
+
 	if(ip->protocol != IP_P_UDP){
 		return (struct hdr) {eth,ip, NULL};
 	}
+	uint16_t fragoff = ip->frag_off;
+	bpf_printk("fragoff %d", fragoff);
 
-	extract_flags(ip->frag_off);
 	
 	if(data + ETH_SIZE + IP_SIZE + UDP_SIZE > data_end)
 		return (struct hdr) {eth,ip, NULL};
