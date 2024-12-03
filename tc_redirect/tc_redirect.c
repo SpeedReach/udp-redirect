@@ -115,7 +115,7 @@ int tcdump(struct __sk_buff *ctx) {
 	if(!is_udp_following && !is_udp_head){
 		return TC_ACT_OK;
 	}
-	bpf_printk("redirect %d %d", is_udp_following, is_udp_head);
+	bpf_printk("redirectwwwwwwwwwwwwwww %d %d", is_udp_following, is_udp_head);
 
 	int ret;
 	for (int i=0;i<SERVER_COUNT;i++){
