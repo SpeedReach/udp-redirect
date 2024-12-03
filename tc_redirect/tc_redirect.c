@@ -67,7 +67,7 @@ typedef struct ip_flags_t {
 	uint8_t df:1;
 	uint8_t mf:1;
 	uint16_t offset:13;
-} __attribute__((packed)) ;
+} ;
 
 
 static __always_inline struct ip_flags_t extract_flags(uint16_t frag_off) {
