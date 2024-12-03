@@ -74,7 +74,7 @@ static __always_inline struct ip_flags_t extract_flags(uint16_t frag_off) {
 	frag_off = bpf_htons(frag_off);
     // The flags are in the first 3 bits (bits 15-13)
     // No need for htons() in the mask since we're extracting from an already network-ordered value
-    uint16_t flags = (frag_off & 0xE000);
+    uint16_t flags = frag_off;
     
     // Right shift to get individual flags
     // Note: frag_off is already in network byte order, so we shift from the correct position
@@ -84,7 +84,7 @@ static __always_inline struct ip_flags_t extract_flags(uint16_t frag_off) {
 	flags_struct.mf = (flags >> 13) & 0x1;       // Bit 13
 	flags_struct.offset = frag_off & 0x1FFF;     // Bits 0-12 (rightmost)
 
-	bpf_printk("flags %u %u %u %u", flags_struct.reserved, flags_struct.df, flags_struct.mf, flags_struct.offset);
+	//bpf_printk("flags %u %u %u %u", flags_struct.reserved, flags_struct.df, flags_struct.mf, flags_struct.offset);
 	return flags_struct;
 }
 
