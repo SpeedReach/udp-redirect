@@ -82,9 +82,9 @@ static __always_inline struct ip_flags_t extract_flags(uint16_t frag_off) {
 	flags_struct.reserved = (flags >> 15) & 0x1; // Bit 15 (leftmost)
 	flags_struct.df = (flags >> 14) & 0x1;       // Bit 14
 	flags_struct.mf = (flags >> 13) & 0x1;       // Bit 13
-	flags_struct.offset = frag_off & 0x1FFF;
+	flags_struct.offset = frag_off & 0x1FFF;     // Bits 0-12 (rightmost)
 
-	bpf_printk("flags %d %d %d %d", flags_struct.reserved, flags_struct.df, flags_struct.mf, flags_struct.offset);
+	bpf_printk("flags %u %u %u %u", flags_struct.reserved, flags_struct.df, flags_struct.mf, flags_struct.offset);
 	return flags_struct;
 }
 
@@ -174,6 +174,7 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 	if(ip->protocol != IP_P_UDP){
 		return (struct hdr) {eth,ip, NULL};
 	}
+
 	struct ip_flags_t flags = extract_flags(ip->frag_off);
 	if(flags.offset != 0){
 		return (struct hdr) {eth,ip, NULL};
@@ -184,7 +185,6 @@ static __always_inline struct hdr try_parse_udp(void* data, void* data_end){
 	
 	struct udphdr* udp = data + ETH_SIZE + IP_SIZE;
 
-	
 
 	return (struct hdr){eth,ip, udp};
 }
