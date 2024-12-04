@@ -110,7 +110,7 @@ int tcdump(struct __sk_buff *ctx) {
 		struct ip_flags flags = extract_flags(header.ip->frag_off);
 		if(flags.mf == 1){
 			int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
-			bpf_printk("update map  %d %d %d", id, ret, header.udp->len);
+			bpf_printk("update map  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
 		}
 	}
 	else if(header.ip->protocol == IP_P_UDP){
