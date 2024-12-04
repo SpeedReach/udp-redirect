@@ -71,18 +71,17 @@ struct ip_flags {
 
 
 static __always_inline struct ip_flags extract_flags(uint16_t frag_off) {
-	frag_off = bpf_htons(frag_off);
-    // The flags are in the first 3 bits (bits 15-13)
-    // No need for htons() in the mask since we're extracting from an already network-ordered value
-    uint16_t flags = (frag_off & 0xE000);
+    frag_off = bpf_htons(frag_off);
     
-    // Right shift to get individual flags
-    // Note: frag_off is already in network byte order, so we shift from the correct position
-    uint8_t reserved = (flags >> 15) & 0x1; // Bit 15 (leftmost)
-    uint8_t df = (flags >> 14) & 0x1;       // Bit 14
-    uint8_t mf = (flags >> 13) & 0x1;       // Bit 13
-	uint16_t offset = (flags >> 3) & 0x1FFF;
-	return (struct ip_flags){reserved, df, mf, offset};
+    // Extract flags from the top 3 bits
+    uint8_t reserved = (frag_off >> 15) & 0x1;  // Bit 15 (leftmost)
+    uint8_t df = (frag_off >> 14) & 0x1;        // Bit 14
+    uint8_t mf = (frag_off >> 13) & 0x1;        // Bit 13
+    
+    // Extract fragment offset from bottom 13 bits
+    uint16_t offset = frag_off & 0x1FFF;
+    
+    return (struct ip_flags){reserved, df, mf, offset};
 }
 
 
@@ -115,6 +114,7 @@ int tcdump(struct __sk_buff *ctx) {
 	if(!is_udp_following && !is_udp_head){
 		return TC_ACT_OK;
 	}
+
 	bpf_printk("redirectwwwwwwwwwwwwwww %d %d", is_udp_following, is_udp_head);
 
 	int ret;
