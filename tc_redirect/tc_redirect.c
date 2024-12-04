@@ -114,11 +114,7 @@ int tcdump(struct __sk_buff *ctx) {
 		}
 	}
 	else if(header.ip->protocol == IP_P_UDP){
-		struct ip_flags flags = extract_flags(header.ip->frag_off);
-		if(flags.mf == 1){
-			bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
-		}
-
+		bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
 	}
 
 	if(!is_udp_following && !is_udp_head){
