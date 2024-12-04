@@ -102,6 +102,7 @@ int tcdump(struct __sk_buff *ctx) {
 	const u16 id = header.ip->id;
 	if(bpf_map_lookup_elem(&dest_map, &id) != NULL){
 		is_udp_following = true;
+		bpf_printk("found map %d!!!!!!!!", id);
 	}
 
 
