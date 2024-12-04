@@ -109,7 +109,7 @@ int tcdump(struct __sk_buff *ctx) {
 		if(flags.mf == 1){
 			u16 id = header.ip->id;
 			int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
-			bpf_printk("update map  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
+			bpf_printk("update map  %d %d %d", id, ret, flags.offset);
 		}
 	}
 
