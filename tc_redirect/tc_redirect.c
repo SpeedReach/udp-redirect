@@ -61,6 +61,27 @@ struct {
 	__type(value, __u16);
 } dest_map SEC(".maps");
 
+extern int bpf_dynptr_from_skb(struct sk_buff *skb, __u64 flags,
+         struct bpf_dynptr *ptr__uninit) __ksym;
+
+extern void *bpf_dynptr_slice(const struct bpf_dynptr *ptr, uint32_t offset,
+         void *buffer, uint32_t buffer__sz) __ksym;
+
+#define IP_MF   0x2000
+#define IP_OFFSET  0x1FFF
+
+static bool is_frag_v4(struct iphdr *iph)
+{
+ int offset;
+ int flags;
+
+ offset = bpf_ntohs(iph->frag_off);
+ flags = offset & ~IP_OFFSET;
+ offset &= IP_OFFSET;
+ offset <<= 3;
+
+ return (flags & IP_MF) || offset;
+}
 
 struct ip_flags {
 	uint8_t reserved;
@@ -88,7 +109,16 @@ static __always_inline struct ip_flags extract_flags(uint16_t frag_off) {
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
-	bpf_skb_pull_data(ctx, ctx->len);
+	struct bpf_dynptr ptr;
+	if(bpf_dynptr_from_skb(ctx, 0, &ptr) != 0){
+		return TC_ACT_OK;
+	}
+	u8 iph_buf[20] = {};
+	struct iphdr* iph = bpf_dynptr_slice(&ptr, 0, iph_buf, sizeof(iph_buf));
+	if(iph == NULL){
+		return TC_ACT_OK;
+	}
+	bpf_printk("%d", is_frag_v4(iph));
 	void* data = (void*)(long)ctx->data;
 	void* data_end = (void*)(long)ctx->data_end;
 
