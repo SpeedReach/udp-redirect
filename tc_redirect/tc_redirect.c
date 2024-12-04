@@ -95,7 +95,7 @@ int tcdump(struct __sk_buff *ctx) {
 		return TC_ACT_OK;
 	}
 
-	bool is_udp_following = true;
+	bool is_udp_following = false;
 	bool is_udp_head = false;
 	if(header.ip->protocol == IP_P_UDP && header.ip->daddr == bpf_htonl(redirect_addr)){
 		bpf_printk("addr match %d", header.ip->id);
