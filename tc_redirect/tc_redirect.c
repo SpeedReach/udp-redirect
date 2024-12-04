@@ -98,6 +98,7 @@ int tcdump(struct __sk_buff *ctx) {
 	bool is_udp_following = true;
 	bool is_udp_head = false;
 	if(header.ip->protocol == IP_P_UDP && header.ip->daddr == bpf_htonl(redirect_addr)){
+		bpf_printk("addr match %d", header.ip->id);
 		struct ip_flags flags =  extract_flags(header.ip->frag_off);
 		if(flags.offset != 0 && bpf_map_lookup_elem(&dest_map, &header.ip->id) != NULL){
 			is_udp_following = true;
