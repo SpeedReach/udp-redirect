@@ -88,7 +88,7 @@ static __always_inline struct ip_flags extract_flags(uint16_t frag_off) {
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
-	bpf_skb_pull_data(ctx, 0);
+	bpf_skb_pull_data(ctx, ctx->len);
 	void* data = (void*)(long)ctx->data;
 	void* data_end = (void*)(long)ctx->data_end;
 
