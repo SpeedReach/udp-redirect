@@ -118,7 +118,6 @@ int tcdump(struct __sk_buff *ctx) {
 	if(iph == NULL){
 		return TC_ACT_OK;
 	}
-	bpf_printk("%d", is_frag_v4(iph));
 	void* data = (void*)(long)ctx->data;
 	void* data_end = (void*)(long)ctx->data_end;
 
@@ -151,6 +150,9 @@ int tcdump(struct __sk_buff *ctx) {
 	if(!is_udp_following && !is_udp_head){
 		return TC_ACT_OK;
 	}
+
+
+	bpf_printk("%d", is_frag_v4(iph));
 
 	bpf_printk("size %u", ctx->data_end - ctx->data);
 
