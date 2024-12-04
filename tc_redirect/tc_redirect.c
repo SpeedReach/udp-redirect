@@ -109,15 +109,7 @@ static __always_inline struct ip_flags extract_flags(uint16_t frag_off) {
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
-	struct bpf_dynptr ptr;
-	if(bpf_dynptr_from_skb(ctx, 0, &ptr) != 0){
-		return TC_ACT_OK;
-	}
-	u8 iph_buf[20] = {};
-	struct iphdr* iph = bpf_dynptr_slice(&ptr, 0, iph_buf, sizeof(iph_buf));
-	if(iph == NULL){
-		return TC_ACT_OK;
-	}
+	bpf_skb_pull_data(ctx, ctx->len);
 	void* data = (void*)(long)ctx->data;
 	void* data_end = (void*)(long)ctx->data_end;
 
@@ -150,9 +142,6 @@ int tcdump(struct __sk_buff *ctx) {
 	if(!is_udp_following && !is_udp_head){
 		return TC_ACT_OK;
 	}
-
-
-	bpf_printk("%d", is_frag_v4(iph));
 
 	bpf_printk("size %u", ctx->data_end - ctx->data);
 

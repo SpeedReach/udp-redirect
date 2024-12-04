@@ -38,7 +38,7 @@ func AttachEbpf() Attachment {
 	xdpLink, err := link.AttachTCX(link.TCXOptions{
 		Interface: iface.Index,
 		Program:   objs.Tcdump,
-		Attach:    ebpf.AttachTCXEgress,
+		Attach:    ebpf.AttachTCXIngress,
 	})
 
 	if err != nil {
