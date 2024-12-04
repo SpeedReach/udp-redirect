@@ -122,7 +122,7 @@ int tcdump(struct __sk_buff *ctx) {
 		return TC_ACT_OK;
 	}
 
-	bpf_printk("size %u", data_end - data);
+	bpf_printk("size %u", ctx->data_end - ctx->data);
 
 	bpf_printk("redirectwwwwwwwwwwwwwww %d %d", is_udp_following, is_udp_head);
 
