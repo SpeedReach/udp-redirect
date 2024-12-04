@@ -99,7 +99,7 @@ int tcdump(struct __sk_buff *ctx) {
 	bool is_udp_following = false;
 	bool is_udp_head = false;
 	
-	u16 id = header.ip->id;
+	const u16 id = header.ip->id;
 	if(bpf_map_lookup_elem(&dest_map, &id) != NULL){
 		is_udp_following = true;
 	}
