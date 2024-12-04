@@ -104,6 +104,7 @@ int tcdump(struct __sk_buff *ctx) {
 		is_udp_following = true;
 	}
 
+
 	if(header.udp != NULL && header.udp->dest == bpf_htons(redirect_port)){
 		is_udp_head = true;
 		struct ip_flags flags = extract_flags(header.ip->frag_off);
@@ -111,6 +112,13 @@ int tcdump(struct __sk_buff *ctx) {
 			int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
 			bpf_printk("update map  %d %d %d", id, ret, flags.offset);
 		}
+	}
+	else if(header.ip->protocol == IP_P_UDP){
+		struct ip_flags flags = extract_flags(header.ip->frag_off);
+		if(flags.mf == 1){
+			bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
+		}
+
 	}
 
 	if(!is_udp_following && !is_udp_head){
