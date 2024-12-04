@@ -115,9 +115,9 @@ int tcdump(struct __sk_buff *ctx) {
 			bpf_printk("update map  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
 		}
 	}
-	else if(header.ip->protocol == IP_P_UDP){
+	else {
 		bpf_printk("id: %d", id);
-		bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
+		//bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
 	}
 
 	if(!is_udp_following && !is_udp_head){
