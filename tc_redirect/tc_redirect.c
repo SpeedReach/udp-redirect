@@ -98,18 +98,19 @@ int tcdump(struct __sk_buff *ctx) {
 
 	bool is_udp_following = false;
 	bool is_udp_head = false;
-	if(header.ip->protocol == IP_P_UDP && header.ip->daddr == bpf_htonl(redirect_addr)){
-		struct ip_flags flags =  extract_flags(header.ip->frag_off);
-		if(bpf_map_lookup_elem(&dest_map, &header.ip->id) != NULL){
-			is_udp_following = true;
-		}
+	
+	if(bpf_map_lookup_elem(&dest_map, &header.ip->id) != NULL){
+		is_udp_following = true;
 	}
 
 	if(header.udp != NULL && header.udp->dest == bpf_htons(redirect_port)){
 		is_udp_head = true;
-		u16 id = header.ip->id;
-		int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
-		bpf_printk("update map  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
+		struct ip_flags flags = extract_flags(header.ip->frag_off);
+		if(flags.df == 1){
+			u16 id = header.ip->id;
+			int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
+			bpf_printk("update map  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
+		}
 	}
 
 	if(!is_udp_following && !is_udp_head){
