@@ -141,8 +141,8 @@ int tcdump(struct __sk_buff *ctx) {
 		ret = bpf_skb_store_bytes(ctx, 0, server_macs[i], 6, 0);
 		bpf_printk("replace mac %d", ret);
 
-		ret = bpf_clone_redirect(ctx, ctx->ifindex, 0);
-		bpf_printk("clone redirect %d", ret);
+		//ret = bpf_clone_redirect(ctx, ctx->ifindex, 0);
+		//bpf_printk("clone redirect %d", ret);
 	}
 
 	return TC_ACT_SHOT;
