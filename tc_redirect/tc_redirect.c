@@ -95,12 +95,13 @@ int tcdump(struct __sk_buff *ctx) {
 	if(header.ip == NULL){
 		return TC_ACT_OK;
 	}
-
+	
 	bool is_udp_following = false;
 	bool is_udp_head = false;
 	
 	const u16 id = header.ip->id;
 	
+	bpf_printk("id: %d", id);
 	if(bpf_map_lookup_elem(&dest_map, &id) != NULL){
 		is_udp_following = true;
 		bpf_printk("found map %d!!!!!!!!", id);
@@ -114,10 +115,6 @@ int tcdump(struct __sk_buff *ctx) {
 			int ret = bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
 			bpf_printk("update map  %d %d %d", id, ret, bpf_ntohs(header.udp->len));
 		}
-	}
-	else {
-		bpf_printk("id: %d", id);
-		//bpf_map_update_elem(&dest_map, &id, &id, BPF_ANY);
 	}
 
 	if(!is_udp_following && !is_udp_head){
