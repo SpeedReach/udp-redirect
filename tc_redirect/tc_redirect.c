@@ -96,12 +96,12 @@ int tcdump(struct __sk_buff *ctx) {
 		return TC_ACT_OK;
 	}
 	
+	
 	bool is_udp_following = false;
 	bool is_udp_head = false;
 	
 	const u16 id = bpf_ntohs(header.ip->id);
 	
-	bpf_printk("id: %d", id);
 	if(bpf_map_lookup_elem(&dest_map, &id) != NULL){
 		is_udp_following = true;
 		bpf_printk("found map %d!!!!!!!!", id);
@@ -120,6 +120,8 @@ int tcdump(struct __sk_buff *ctx) {
 	if(!is_udp_following && !is_udp_head){
 		return TC_ACT_OK;
 	}
+
+	bpf_printk("size %u", data_end - data);
 
 	bpf_printk("redirectwwwwwwwwwwwwwww %d %d", is_udp_following, is_udp_head);
 
