@@ -65,6 +65,13 @@ struct {
 	__type(value, __u16);
 } dest_map SEC(".maps");
 
+struct {
+	__uint(type, BPF_MAP_TYPE_ARRAY);
+	__uint(max_entries, 1);
+	__type(key, u32);
+	__type(value, u32);
+} counter_map SEC(".maps");
+
 
 extern int bpf_dynptr_from_skb(struct sk_buff *skb, __u64 flags,
          struct bpf_dynptr *ptr__uninit) __ksym;
@@ -153,6 +160,20 @@ int tcdump(struct __sk_buff *ctx) {
 
 	bpf_printk("is following, is head %d %d", is_udp_following, is_udp_head);
 
+
+	const u32 counterKey = 0;
+	const u32 initial_value = 1;
+	u32 *count = bpf_map_lookup_elem(&counter_map, &counterKey);
+	if(is_udp_head){
+		if(count){
+			__sync_fetch_and_add(count, 1);
+		}
+		else{
+			count = &initial_value;
+			bpf_map_update_elem(&counter_map, &counterKey, &initial_value, BPF_ANY);
+		}
+		bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + UDP_SIZE, count, sizeof(u32), 0);
+	}
 	int ret;
 	for (int i=0;i<SERVER_COUNT;i++){
 		if(is_udp_head){
