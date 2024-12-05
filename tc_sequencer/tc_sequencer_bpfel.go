@@ -60,7 +60,8 @@ type tc_sequencerProgramSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type tc_sequencerMapSpecs struct {
-	DestMap *ebpf.MapSpec `ebpf:"dest_map"`
+	CounterMap *ebpf.MapSpec `ebpf:"counter_map"`
+	DestMap    *ebpf.MapSpec `ebpf:"dest_map"`
 }
 
 // tc_sequencerObjects contains all objects after they have been loaded into the kernel.
@@ -82,11 +83,13 @@ func (o *tc_sequencerObjects) Close() error {
 //
 // It can be passed to loadTc_sequencerObjects or ebpf.CollectionSpec.LoadAndAssign.
 type tc_sequencerMaps struct {
-	DestMap *ebpf.Map `ebpf:"dest_map"`
+	CounterMap *ebpf.Map `ebpf:"counter_map"`
+	DestMap    *ebpf.Map `ebpf:"dest_map"`
 }
 
 func (m *tc_sequencerMaps) Close() error {
 	return _Tc_sequencerClose(
+		m.CounterMap,
 		m.DestMap,
 	)
 }
