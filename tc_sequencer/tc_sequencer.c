@@ -179,8 +179,22 @@ int tcdump(struct __sk_buff *ctx) {
 			bpf_map_update_elem(&counter_map, &counterKey, &initial_value, BPF_ANY);
 		}
 		u32 seq = *count;
+		
 		//replace the payload with the sequence number
-		int ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + UDP_SIZE + 4, &seq, sizeof(seq), 0);
+		//the payload has to be aligned to 4 bytes
+		//so we need to pad the payload with 0s
+		//to make sure the sequence number is at the right position
+		//we need to calculate the padding size
+		u32 payload_offset = ETH_SIZE + IP_SIZE + UDP_SIZE;
+		u32 padding_size = 4 - (bpf_ntohs(header.udp->len) % 4);
+		if(padding_size == 4){
+			padding_size = 0;
+		}
+		u32 new_len = bpf_ntohs(header.udp->len) + padding_size;
+		u32 new_total_len = bpf_ntohs(header.ip->tot_len) + padding_size;
+		bpf_printk("new len %d %d %d", new_len, new_total_len, padding_size);
+		int ret = bpf_skb_store_bytes(ctx, payload_offset, &seq, sizeof(seq), 0);
+		
 		bpf_printk("replace seq %d %d", ret, seq);
 	}
 	int ret;
