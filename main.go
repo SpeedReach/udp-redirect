@@ -76,7 +76,7 @@ func sequencerTestSend(){
 	for i := 0; i < 8000; i++{
 		payload[i] = 'H'
 	}
-	for i := 0; i < 10; i++{
+	for true{
 		conn.Write(payload)
 	}
 }
