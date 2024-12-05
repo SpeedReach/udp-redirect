@@ -76,13 +76,12 @@ func sequencerTestSend(){
 	for i := 0; i < packetSize; i++{
 		payload[i] = 'H'
 	}
-	for true{
+	for {
 		conn.Write(payload)
 	}
 }
 
 func sequencerTestReceive(){
-	//listen on (192 << 24) | (168 << 16) | (50 << 8) | 224:12346
 	addr := net.UDPAddr{
 		Port: 12346,
 		IP:   net.ParseIP("192.168.50.224"),
@@ -92,7 +91,7 @@ func sequencerTestReceive(){
 		panic(err)
 	}
 	defer conn.Close()
-	buffer := make([]byte, packetSize)
+	buffer := make([]byte, 8000)
 	for{
 		n, _, err := conn.ReadFromUDP(buffer)
 		if err != nil{

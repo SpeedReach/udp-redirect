@@ -116,7 +116,6 @@ static __always_inline struct ip_flags extract_flags(uint16_t frag_off) {
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
-	bpf_skb_pull_data(ctx, ctx->len);
 	void* data = (void*)(long)ctx->data;
 	void* data_end = (void*)(long)ctx->data_end;
 
@@ -161,7 +160,7 @@ int tcdump(struct __sk_buff *ctx) {
 			ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, dest), &new_port, sizeof(new_port), BPF_F_RECOMPUTE_CSUM);
 			bpf_printk("replace port %d", ret);
 		}
-		
+
 		uint32_t new_daddr = bpf_htonl(server_ips[i]);
 		ret	= bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, daddr), &new_daddr,
 				sizeof(u32), 0);
@@ -180,7 +179,7 @@ int tcdump(struct __sk_buff *ctx) {
 		bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, check), &check,
 			sizeof(u16), 0);
 
-		ret = bpf_skb_store_bytes(ctx, 0, server_macs[i], 6, 0);
+		ret = bpf_skb_store_bytes(ctx, offsetof(struct ethhdr, h_dest), server_macs[i], 6, 0);
 		bpf_printk("replace mac %d", ret);
 		ret = bpf_skb_store_bytes(ctx, offsetof(struct ethhdr, h_source ), redirect_mac, 6, 0);
 
