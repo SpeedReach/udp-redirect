@@ -98,6 +98,7 @@ func sequencerTestReceive(){
 			panic(err)
 		}
 		fmt.Printf("Received %d bytes\n", n)
+		fmt.Printf("%s\n", string(buffer[:40]))
 	}
 }
 
