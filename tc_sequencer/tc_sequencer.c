@@ -178,8 +178,9 @@ int tcdump(struct __sk_buff *ctx) {
 			count = &initial_value;
 			bpf_map_update_elem(&counter_map, &counterKey, &initial_value, BPF_ANY);
 		}
-		int ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + UDP_SIZE, count, sizeof(u32), 0);
-		bpf_printk("store counter %d %d", ret, *count);
+		u32 seq = *count;
+		int ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + UDP_SIZE, &seq, sizeof(u32), 0);
+		bpf_printk("store counter %d %d", ret, seq);
 	}
 	int ret;
 	for (int i=0;i<SERVER_COUNT;i++){

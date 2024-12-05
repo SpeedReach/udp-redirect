@@ -98,7 +98,6 @@ func sequencerTestReceive(){
 		if err != nil{
 			panic(err)
 		}
-		fmt.Printf("Received %d bytes\n", n)
 		sequenceBytes := buffer[:4]
 		sequence := binary.LittleEndian.Uint32(sequenceBytes)
 		fmt.Printf("Recieved %d bytes, Sequence %d\n",n , sequence)
