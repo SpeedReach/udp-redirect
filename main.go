@@ -92,7 +92,7 @@ func sequencerTestReceive(){
 		panic(err)
 	}
 	defer conn.Close()
-	buffer := make([]byte, 8000)
+	buffer := make([]byte, packetSize)
 	for{
 		n, _, err := conn.ReadFromUDP(buffer)
 		if err != nil{
