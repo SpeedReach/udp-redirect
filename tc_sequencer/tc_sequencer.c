@@ -156,6 +156,12 @@ int tcdump(struct __sk_buff *ctx) {
 		return TC_ACT_OK;
 	}
 
+	struct ip_flags flags = extract_flags(header.ip->frag_off);
+	if(flags.mf == 0){
+		bpf_printk("not following %d", id);
+		bpf_map_delete_elem(&dest_map, &id);
+	}
+
 	bpf_printk("size %u", ctx->data_end - ctx->data);
 
 	bpf_printk("is following, is head %d %d", is_udp_following, is_udp_head);
