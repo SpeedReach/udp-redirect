@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/binary"
 	"flag"
 	"fmt"
+	"math/bits"
 	"net"
 	"time"
 
@@ -98,7 +100,9 @@ func sequencerTestReceive(){
 			panic(err)
 		}
 		fmt.Printf("Received %d bytes\n", n)
-		fmt.Printf("%s\n", string(buffer[:min(n, 100)]))
+		sequenceBytes := buffer[:4]
+		sequence := binary.LittleEndian.Uint32(sequenceBytes)
+		fmt.Printf("Recieved %d bytes, Sequence %d\n",n , sequence)
 	}
 }
 
