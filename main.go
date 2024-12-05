@@ -72,8 +72,8 @@ func sequencerTestSend(){
 		panic(err)
 	}
 	defer conn.Close()
-	payload := make([]byte, 8000)
-	for i := 0; i < 8000; i++{
+	payload := make([]byte, packetSize)
+	for i := 0; i < packetSize; i++{
 		payload[i] = 'H'
 	}
 	for true{
@@ -162,7 +162,7 @@ func (c Client) Close(){
 	}
 }
 
-const packetSize = 8000
+const packetSize = 1000
 
 
 func (client Client) StartClient(){
