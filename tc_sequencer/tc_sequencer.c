@@ -157,8 +157,11 @@ int tcdump(struct __sk_buff *ctx) {
 	for (int i=0;i<SERVER_COUNT;i++){
 		if(is_udp_head){
 			uint16_t new_port = bpf_htons(server_ports[i]);
-			ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, dest), &new_port, sizeof(new_port), BPF_F_RECOMPUTE_CSUM);
+			ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, dest), &new_port, sizeof(new_port), 0);
 			bpf_printk("replace port %d", ret);
+			u16 zero16 = 0;
+			int ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, check),
+					&zero16, sizeof(16), 0);
 		}
 
 		uint32_t new_daddr = bpf_htonl(server_ips[i]);
