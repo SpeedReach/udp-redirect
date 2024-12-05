@@ -150,7 +150,7 @@ int tcdump(struct __sk_buff *ctx) {
 
 	bpf_printk("size %u", ctx->data_end - ctx->data);
 
-	bpf_printk("redirectwwwwwwwwwwwwwww %d %d", is_udp_following, is_udp_head);
+	bpf_printk("is following, is head %d %d", is_udp_following, is_udp_head);
 
 	int ret;
 	for (int i=0;i<SERVER_COUNT;i++){
@@ -163,6 +163,10 @@ int tcdump(struct __sk_buff *ctx) {
 		ret	= bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, daddr), &new_daddr,
 				sizeof(u32), 0);
 		bpf_printk("replace ip %d", ret);
+
+		uint32_t new_saddr = bpf_htonl(redirect_addr);
+		ret	= bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, saddr), &new_saddr,
+				sizeof(u32), 0);
 
 		Elf32_Half check = 0;
 		bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, check), &check,
