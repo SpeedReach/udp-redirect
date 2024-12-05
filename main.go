@@ -92,7 +92,7 @@ func sequencerTestReceive(){
 		panic(err)
 	}
 	defer conn.Close()
-	buffer := make([]byte, 8000)
+	buffer := make([]byte, 9000)
 	for{
 		n, _, err := conn.ReadFromUDP(buffer)
 		if err != nil{
@@ -100,7 +100,8 @@ func sequencerTestReceive(){
 		}
 		sequenceBytes := buffer[:4]
 		sequence := binary.LittleEndian.Uint32(sequenceBytes)
-		fmt.Printf("Recieved %d bytes, Sequence %d\n",n , sequence)
+		test := binary.LittleEndian.Uint32(buffer[4:8])
+		fmt.Printf("Recieved %d bytes, Sequence %d %d\n",n , sequence, test)
 	}
 }
 
