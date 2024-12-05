@@ -37,6 +37,8 @@ __u16 redirect_port = 12345;
 
 __u32 redirect_addr = (192 << 24) | (168 << 16) | (50 << 8) | 213;
 
+__u8 redirect_mac[6] = {0x9c, 0x2d, 0xcd, 0x48, 0xb1, 0x04};
+
 __u16 server_ports[SERVER_COUNT] = {
 	12346,
 	12347,
@@ -176,6 +178,8 @@ int tcdump(struct __sk_buff *ctx) {
 			check = compute_ip_checksum(header.ip, (void*) ctx->data_end);
 		bpf_skb_store_bytes(ctx, ETH_SIZE + offsetof(struct iphdr, check), &check,
 			sizeof(u16), 0);
+
+		
 
 		ret = bpf_skb_store_bytes(ctx, 0, server_macs[i], 6, 0);
 		bpf_printk("replace mac %d", ret);
