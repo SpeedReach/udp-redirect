@@ -180,8 +180,7 @@ int tcdump(struct __sk_buff *ctx) {
 		}
 
 		u32 seq = *count;
-		u32 payload_offset = ETH_SIZE + IP_SIZE + UDP_SIZE;
-		int ret = bpf_skb_store_bytes(ctx, payload_offset+1, &seq, sizeof(seq), 0);
+		int ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + UDP_SIZE+2, &seq, sizeof(seq), 0);
 		
 		bpf_printk("replace seq %d %d", ret, seq);
 	}
