@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/SpeedReach/udp_redirect/tc_redirect"
+	"github.com/SpeedReach/udp_redirect/tc_sequencer"
 	"github.com/SpeedReach/udp_redirect/xdp_ack"
 )
 
@@ -33,6 +34,17 @@ const ackIp = "192.168.50.213"
 func main(){
 	isServer := flag.Bool("server", false, "true")
 	flag.Parse()
+	if !*isServer{
+		ebpf := tc_sequencer.AttachEbpf()
+		defer ebpf.Close()
+		println("Sequencer Attached.")
+		for{}
+	}else{
+		go sequencerTestReceive()
+		sequencerTestSend()
+	}
+
+	return
 	if *isServer{
 		//link := xdp_ack.AttachEbpf()
 
@@ -51,6 +63,45 @@ func main(){
 		client.StartClient()
 	}
 }
+
+
+func sequencerTestSend(){
+	//create udp conn and send to sequencer
+	conn, err := net.Dial("udp", fmt.Sprintf("%s:%d", "192.168.50.213", 12345))
+	if err != nil{
+		panic(err)
+	}
+	defer conn.Close()
+	payload := make([]byte, 8000)
+	for i := 0; i < 8000; i++{
+		payload[i] = 'H'
+	}
+	for i := 0; i < 10; i++{
+		conn.Write(payload)
+	}
+}
+
+func sequencerTestReceive(){
+	//listen on (192 << 24) | (168 << 16) | (50 << 8) | 224:12346
+	addr := net.UDPAddr{
+		Port: 12346,
+		IP:   net.ParseIP("192.168.50.224"),
+	}
+	conn, err := net.ListenUDP("udp", &addr)
+	if err != nil{
+		panic(err)
+	}
+	defer conn.Close()
+	buffer := make([]byte, 8000)
+	for{
+		n, _, err := conn.ReadFromUDP(buffer)
+		if err != nil{
+			panic(err)
+		}
+		fmt.Printf("Received %d bytes\n", n)
+	}
+}
+
 
 type Client struct{
 	broadcastConn []*net.UDPConn
