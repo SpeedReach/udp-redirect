@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"net"
@@ -98,8 +99,9 @@ func sequencerTestReceive(){
 		if err != nil{
 			panic(err)
 		}
-		fmt.Printf("Received %d bytes %s\n", n, string(buffer[:n]))
-
+		for i := 0; i < n; i++ {
+			fmt.Printf("%d", buffer[i])	
+		}
 	}
 }
 
