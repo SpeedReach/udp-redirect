@@ -99,7 +99,7 @@ func sequencerTestReceive(){
 		if err != nil{
 			panic(err)
 		}
-		sequenceBytes := buffer[:4]
+		sequenceBytes := buffer[0:4]
 		sequence := binary.LittleEndian.Uint32(sequenceBytes)
 		test := binary.LittleEndian.Uint32(buffer[4:8])
 		test2 := binary.LittleEndian.Uint32(buffer[8:12])
@@ -167,7 +167,7 @@ func (c Client) Close(){
 	}
 }
 
-const packetSize = 8000
+const packetSize = 1000
 
 
 func (client Client) StartClient(){
