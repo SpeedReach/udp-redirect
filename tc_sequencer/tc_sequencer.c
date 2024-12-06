@@ -179,7 +179,7 @@ int tcdump(struct __sk_buff *ctx) {
 			bpf_map_update_elem(&counter_map, &counterKey, &initial_value, BPF_ANY);
 		}
 
-		u32 seq = bpf_ntohl(*count);
+		u32 seq = *count;
 		int ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + UDP_SIZE, &seq, sizeof(seq), 0);
 		bpf_printk("replace seq %d %d", ret, seq);
 	}
