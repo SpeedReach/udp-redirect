@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"net"
@@ -98,10 +99,9 @@ func sequencerTestReceive(){
 		if err != nil{
 			panic(err)
 		}
-		for i := 0; i < n; i++ {
-			fmt.Printf("%d", buffer[i])	
-		}
-		fmt.Println()
+		sequenceBytes := buffer[n-4:n]
+		sequence := binary.LittleEndian.Uint32(sequenceBytes)
+		fmt.Printf("Received sequence %d\n", sequence)
 	}
 }
 
