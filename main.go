@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/binary"
 	"flag"
 	"fmt"
 	"net"
@@ -102,6 +101,7 @@ func sequencerTestReceive(){
 		for i := 0; i < n; i++ {
 			fmt.Printf("%d", buffer[i])	
 		}
+		fmt.Println()
 	}
 }
 
