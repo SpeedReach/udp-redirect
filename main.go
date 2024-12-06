@@ -79,6 +79,7 @@ func sequencerTestSend(){
 	}
 	for {
 		conn.Write(payload)
+		time.Sleep(time.Second)
 	}
 }
 
