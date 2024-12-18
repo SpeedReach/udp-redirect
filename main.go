@@ -104,13 +104,15 @@ func sequencerTestReceive(){
 		sequence := binary.LittleEndian.Uint32(sequenceBytes)
 		fmt.Printf("Received sequence %d\n", sequence)
 		fmt.Printf("Received message: %s", string(buffer[:n-4]))
-		for i := 0; i < packetSize - 4; i++{
+		totalH := 0
+		for i := 0; i < n ; i++{
 			if buffer[i] != 'H'{
 				println(fmt.Sprintf("Not H at %d but %d", i, buffer[i]))
 			} else{
-				print("match")	
+				totalH += 1
 			}
 		}
+		fmt.Printf("Total H: %d\n", totalH)
 	}
 }
 
