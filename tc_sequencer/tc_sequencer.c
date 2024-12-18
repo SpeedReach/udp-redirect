@@ -183,9 +183,9 @@ int tcdump(struct __sk_buff *ctx) {
 		}
 	}
 	if(is_last_packet && count != NULL && ctx->data_end - ctx->data >= sizeof(*count)){
-		u32 seq = *count;
-		int ret = bpf_skb_store_bytes(ctx, ctx->data_end - ctx->data - sizeof(seq), &seq, sizeof(seq), 0);
-		bpf_printk("replace seq %d %d", ret, seq);
+		//u32 seq = *count;
+		//int ret = bpf_skb_store_bytes(ctx, ctx->data_end - ctx->data - sizeof(seq), &seq, sizeof(seq), 0);
+		//bpf_printk("replace seq %d %d", ret, seq);
 	}
 
 	int ret;
