@@ -120,6 +120,7 @@ static __always_inline struct ip_flags extract_flags(uint16_t frag_off) {
     return (struct ip_flags){reserved, df, mf, offset};
 }
 
+const magic_number = 1 << 16;
 
 SEC("tc")
 int tcdump(struct __sk_buff *ctx) {
