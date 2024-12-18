@@ -185,10 +185,16 @@ func (client Client) StartClient(){
 	defer client.Close()
 	for {
 		for i := 0; i < serverCount; i++{
-			var arr = make([]byte, packetSize)
+			var arr = make([]byte, packetSize+6)
+			arr[0] =' '
+			arr[1] = ' '
 			for j := 0; j < packetSize; j++{
-				arr[j] = 'H'
+				arr[j+2] = 'H'
 			}
+			arr[packetSize] = ' '
+			arr[packetSize+1] = ' '
+			arr[packetSize+2] = ' '
+			arr[packetSize+3] = ' '
 			_, err := client.broadcastConn[i].Write(arr)
 			if err != nil{
 				panic(err)
