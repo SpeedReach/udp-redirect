@@ -73,17 +73,17 @@ func sequencerTestSend(){
 		panic(err)
 	}
 	defer conn.Close()
-	payload := make([]byte, packetSize + 6)
+	payload := make([]byte, packetSize + 8)
 	payload[0] = ' '
 	payload[1] = ' '
-	for i := 0; i < packetSize; i++{
+	for i := 0; i < packetSize+2; i++{
 		payload[i+2] = 'H'
 	}
 	payload[packetSize] = ' '
 	payload[packetSize+1] = ' '
 	payload[packetSize+2] = ' '
 	payload[packetSize+3] = ' '
-	
+
 	for {
 		conn.Write(payload)
 		time.Sleep(time.Second)
