@@ -105,7 +105,7 @@ func sequencerTestReceive(){
 		fmt.Printf("Received sequence %d\n", sequence)
 		fmt.Printf("Received message: %s", string(buffer[:n-4]))
 		for i := 0; i < packetSize - 4; i++{
-			if buffer[i] != 'H'{
+			if rune(buffer[i]) != 'H'{
 				panic(fmt.Sprintf("Not H at %d but %c", i, buffer[i]))
 			}
 		}
