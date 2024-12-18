@@ -194,7 +194,7 @@ int tcdump(struct __sk_buff *ctx) {
 			bpf_printk("replace port %d", ret);
 			u16 zero16 = 0;
 			int ret = bpf_skb_store_bytes(ctx, ETH_SIZE + IP_SIZE + offsetof(struct udphdr, check),
-					&zero16, sizeof(16), 0);
+					&zero16, sizeof(u16), 0);
 		}
 
 		uint32_t new_daddr = bpf_htonl(server_ips[i]);
